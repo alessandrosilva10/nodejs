@@ -2,41 +2,33 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
-const mongoose = require('mongoose');
-
-//middleware
-app.use(bodyParser.json());
-app.use(morgan('tiny'));
-app.disable('etag');
+const connectDB = require('./config/db');
+const speeches = require('./routes/speaking');
+var cors = require('cors');
 
 require('dotenv/config')
 const api = process.env.API_URL || ''
 
-app.get(`${api}/products`, (req, res) => {
-    const products = {
-        id: 1,
-        name: "hair dresser",
-        image: 'some_url'
-    }
-    res.send(products)
-})
+connectDB();
 
-app.post(`${api}/products`, (req, res) => {
-    const newProduct = req.body;
-    res.json(newProduct)
-})
+//middleware
+app.use(cors());
+app.use(bodyParser.json());
+if(process.env.NODE_ENV === 'development'){
+    app.use(morgan('tiny'));
+}
+app.disable('etag');
 
-mongoose.connect(process.env.MONGODB, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    dbName: process.env.DATABASE_NAME
-})
-.then(() => {
-    console.log('Database connection is ready');
-}).catch(err => {
-    console.log(err);
-})
+app.use(`${api}/speeches`, speeches);
 
-app.listen(process.env.PORT || 3000, () => {
+
+const server = app.listen(
+    process.env.PORT || 5000, () => {
     console.log(`Server running in ${process.env.NODE_ENV} mode on port ${process.env.PORT}`)
+});
+
+// handle unhandled Rejections
+process.on('unhandledRejection', (err, promise) => {
+    console.log(`Error: ${err.message}`);
+    server.close(() => process.exit(1));
 });
