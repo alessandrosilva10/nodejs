@@ -1,0 +1,11 @@
+---
+application:
+  name: "api-nodejs-english-speeches"
+  project: "english-speeches"
+  organization: "QoveryCommunity"
+routers:
+- name: "main-api-nodejs-english-speeches"
+  routes:
+  - application_name: "api-nodejs-english-speeches"
+    paths:
+    - "/*"
